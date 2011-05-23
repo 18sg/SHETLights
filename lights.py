@@ -1,37 +1,50 @@
-from timer import Timer
 from bind import *
-from light import Light
+
+from settable_controller import SettableController
+from aggregator import Aggregator
+from timer_controller import TimerController
+from shet.path import join
+
 from twisted.internet import reactor
 
+TimerController("/lights/override", 10*60, None).install()
+SettableController("/lights/daylight", None).install()
 
-Light("/hall/lights", 120).install()
-Light("/landing/lights", 120).install()
-Light("/attic/lights", 120).install()
-Light("/bog/lights", 120).install()
-Light("/lounge/lights_new/lounge", 600).install()
-Light("/lounge/lights_new/kitchen", 600).install()
 
-EventToProperty("/hall/lights/on_change", "/karl/arduino/light_hall").install()
-EventToProperty("/landing/lights/on_change", "/karl/arduino/light_landing").install()
-EventToProperty("/bog/lights/on_change", "/jonathan/arduino/bogvo").install()
-EventToProperty("/attic/lights/on_change", "/tom/servo").install()
-EventToProperty("/lounge/lights_new/lounge/on_change", "/lounge/lights/lounge").install()
-EventToProperty("/lounge/lights_new/kitchen/on_change", "/lounge/lights/kitchen").install()
+def setup_light(name, time):
+	Aggregator(name, ["/lights/override", "override", "/lights/daylight", "timer"]).install()
+	TimerController(join(name, "timer"), time, False).install()
+	TimerController(join(name, "override"), 10*60, None).install()
 
-EventToAction("/tom/pir_landing", "/attic/lights/timer/turn_on").install()
-EventToAction("/jonathan/arduino/pir", "/bog/lights/timer/turn_on").install()
-EventToAction("/karl/arduino/pir_hall", "/hall/lights/timer/turn_on").install()
+
+setup_light("/hall/lights", 120)
+setup_light("/landing/lights", 120)
+setup_light("/attic/lights", 120)
+setup_light("/bog/lights", 120)
+setup_light("/lounge/lights_new/lounge", 600)
+setup_light("/lounge/lights_new/kitchen", 600)
+
+EventToProperty("/hall/lights/state_change", "/karl/arduino/light_hall").install()
+EventToProperty("/landing/lights/state_change", "/karl/arduino/light_landing").install()
+EventToProperty("/bog/lights/state_change", "/jonathan/arduino/bogvo").install()
+EventToProperty("/attic/lights/state_change", "/tom/servo").install()
+EventToProperty("/lounge/lights_new/lounge/state_change", "/lounge/lights/lounge").install()
+EventToProperty("/lounge/lights_new/kitchen/state_change", "/lounge/lights/kitchen").install()
+
+EventToAction("/tom/pir_landing", "/attic/lights/timer/on").install()
+EventToAction("/jonathan/arduino/pir", "/bog/lights/timer/on").install()
+EventToAction("/karl/arduino/pir_hall", "/hall/lights/timer/on").install()
 
 #Temporary while the bulb is blown.
-# EventToAction("/karl/arduino/pir_hall", "/landing/lights/timer/turn_on").install()
+# EventToAction("/karl/arduino/pir_hall", "/landing/lights/timer/on").install()
 # Not temporary while trollin'.
-EventToAction("/hall/lights/on_change", "/tom/reading").install()
+EventToAction("/hall/lights/state_change", "/tom/reading").install()
 
-EventToAction("/tom/pir_middle", "/landing/lights/timer/turn_on").install()
-EventToAction("/tom/pir_middle", "/attic/lights/timer/turn_on").install()
+EventToAction("/tom/pir_middle", "/landing/lights/timer/on").install()
+EventToAction("/tom/pir_middle", "/attic/lights/timer/on").install()
 
-EventToAction("/lounge/arduino/pir", "/lounge/lights_new/lounge/timer/turn_on").install()
-EventToAction("/lounge/arduino/pir", "/lounge/lights_new/kitchen/timer/turn_on").install()
+EventToAction("/lounge/arduino/pir", "/lounge/lights_new/lounge/timer/on").install()
+EventToAction("/lounge/arduino/pir", "/lounge/lights_new/kitchen/timer/on").install()
 
 
 
@@ -52,14 +65,14 @@ EventToAction("/lounge/arduino/pir", "/lounge/lights_new/kitchen/timer/turn_on")
 # 	lounge="lounge kitchen".split()
 # )
 # 
-# shet /attic/lights/timer/turn_on
-# shet /bog/lights/timer/turn_on
-# shet /hall/lights/timer/turn_on
+# shet /attic/lights/timer/on
+# shet /bog/lights/timer/on
+# shet /hall/lights/timer/on
 # 
-# shet /landing/lights/timer/turn_on
-# shet /attic/lights/timer/turn_on
+# shet /landing/lights/timer/on
+# shet /attic/lights/timer/on
 # 
-# shet /lounge/lights_new/lounge/timer/turn_on
-# shet /lounge/lights_new/kitchen/timer/turn_on
+# shet /lounge/lights_new/lounge/timer/on
+# shet /lounge/lights_new/kitchen/timer/on
 
 reactor.run()
