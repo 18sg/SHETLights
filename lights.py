@@ -22,6 +22,11 @@ EventToAction("/tom/pir_landing", "/attic/lights/timer/turn_on").install()
 EventToAction("/jonathan/arduino/pir", "/bog/lights/timer/turn_on").install()
 EventToAction("/karl/arduino/pir_hall", "/hall/lights/timer/turn_on").install()
 
+#Temporary while the bulb is blown.
+# EventToAction("/karl/arduino/pir_hall", "/landing/lights/timer/turn_on").install()
+# Not temporary while trollin'.
+EventToAction("/hall/lights/on_change", "/tom/reading").install()
+
 EventToAction("/tom/pir_middle", "/landing/lights/timer/turn_on").install()
 EventToAction("/tom/pir_middle", "/attic/lights/timer/turn_on").install()
 
