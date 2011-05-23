@@ -65,6 +65,14 @@ class TimerController(ShetClient, Controller):
 		
 		self.set_state(state)
 	
+	@shet_action
+	def on(self, timeout=None):
+		self.start(True, timeout)
+	
+	@shet_action
+	def off(self, timeout=None):
+		self.start(False, timeout)
+	
 	# Ran when the timer finishes.
 	def timed_out(self):
 		# Discard the timer, reset the state, and raise timed_out.
