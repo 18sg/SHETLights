@@ -27,21 +27,16 @@ setup_light("/lounge/lights_new/kitchen", 600)
 EventToProperty("/hall/lights/state_change", "/karl/arduino/light_hall").install()
 EventToProperty("/landing/lights/state_change", "/karl/arduino/light_landing").install()
 EventToProperty("/bog/lights/state_change", "/jonathan/arduino/bogvo").install()
-EventToProperty("/attic/lights/state_change", "/tom/servo").install()
+EventToProperty("/landing/lights/state_change", "/tom/servo").install()
 EventToProperty("/lounge/lights_new/lounge/state_change", "/lounge/lights/lounge").install()
 EventToProperty("/lounge/lights_new/kitchen/state_change", "/lounge/lights/kitchen").install()
 
 EventToAction("/tom/pir_landing", "/attic/lights/timer/on").install()
-EventToAction("/jonathan/arduino/pir", "/bog/lights/timer/on").install()
+EventToAction("/jonathan/arduino/bogir", "/bog/lights/timer/on").install()
 EventToAction("/karl/arduino/pir_hall", "/hall/lights/timer/on").install()
-
-#Temporary while the bulb is blown.
-# EventToAction("/karl/arduino/pir_hall", "/landing/lights/timer/on").install()
-# Not temporary while trollin'.
-EventToAction("/hall/lights/state_change", "/tom/reading").install()
+EventToAction("/jonathan/arduino/stairir", "/landing/lights/timer/on").install()
 
 EventToAction("/tom/pir_middle", "/landing/lights/timer/on").install()
-EventToAction("/tom/pir_middle", "/attic/lights/timer/on").install()
 
 EventToAction("/lounge/arduino/pir", "/lounge/lights_new/lounge/timer/on").install()
 EventToAction("/lounge/arduino/pir", "/lounge/lights_new/kitchen/timer/on").install()
