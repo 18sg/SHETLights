@@ -32,9 +32,9 @@ EventToProperty("/lounge/lights_new/lounge/state_change", "/lounge/lights/lounge
 EventToProperty("/lounge/lights_new/kitchen/state_change", "/lounge/lights/kitchen").install()
 
 EventToAction("/tom/pir_landing", "/attic/lights/timer/on").install()
-EventToAction("/jonathan/arduino/bogir", "/bog/lights/timer/on").install()
+EventToAction("/jonathan/arduino/pir_bog", "/bog/lights/timer/on").install()
 EventToAction("/karl/arduino/pir_hall", "/hall/lights/timer/on").install()
-EventToAction("/jonathan/arduino/stairir", "/landing/lights/timer/on").install()
+EventToAction("/jonathan/arduino/pir_stairs", "/landing/lights/timer/on").install()
 
 EventToAction("/tom/pir_middle", "/landing/lights/timer/on").install()
 
