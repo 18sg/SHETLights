@@ -26,8 +26,9 @@ setup_light("/lounge/lights_new/kitchen", 600)
 
 EventToProperty("/hall/lights/state_change", "/karl/arduino/light_hall").install()
 EventToProperty("/landing/lights/state_change", "/karl/arduino/light_landing").install()
-EventToProperty("/bog/lights/state_change", "/jonathan/arduino/bogvo").install()
 EventToProperty("/landing/lights/state_change", "/tom/servo").install()
+EventToProperty("/bog/lights/state_change", "/jonathan/arduino/light_bog").install()
+EventToProperty("/attic/lights/state_change", "/jonathan/arduino/light_attic").install()
 EventToProperty("/lounge/lights_new/lounge/state_change", "/lounge/lights/lounge").install()
 EventToProperty("/lounge/lights_new/kitchen/state_change", "/lounge/lights/kitchen").install()
 
@@ -35,6 +36,7 @@ EventToAction("/tom/pir_landing", "/attic/lights/timer/on").install()
 EventToAction("/jonathan/arduino/pir_bog", "/bog/lights/timer/on").install()
 EventToAction("/karl/arduino/pir_hall", "/hall/lights/timer/on").install()
 EventToAction("/jonathan/arduino/pir_stairs", "/landing/lights/timer/on").install()
+EventToAction("/jonathan/arduino/pir_stairs", "/attic/lights/timer/on").install()
 
 EventToAction("/tom/pir_middle", "/landing/lights/timer/on").install()
 
