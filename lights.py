@@ -1,6 +1,7 @@
 from bind import *
 
 from settable_controller import SettableController
+from daylight_controller import DaylightController
 from aggregator import Aggregator
 from timer_controller import TimerController
 from shet.path import join
@@ -8,7 +9,7 @@ from shet.path import join
 from twisted.internet import reactor
 
 TimerController("/lights/override", 10*60, None).install()
-SettableController("/lights/daylight", None).install()
+DaylightController("/lights/daylight", 53.46171, -2.217164).install()
 
 
 def setup_light(name, time):
