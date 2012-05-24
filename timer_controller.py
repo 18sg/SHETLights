@@ -76,13 +76,14 @@ class TimerController(ShetClient, Controller):
 	# Ran when the timer finishes.
 	def timed_out(self):
 		# Discard the timer, reset the state, and raise timed_out.
+		if self.timer is not None and self.timer.active():
+			self.timer.cancel()
 		self.timer = None
 		self.set_state(self.default_state)
 		self.on_timed_out()
 	
 	@shet_action
 	def finish(self):
-		# This is possibly a hack, I'm not sure...
 		self.timed_out()
 	
 	# Is the timer running?
