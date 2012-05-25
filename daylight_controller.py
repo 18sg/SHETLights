@@ -57,7 +57,7 @@ class DaylightController(ShetClient, Controller):
 		
 		# Call after the specified delay. Add a second to ensure that we pass the
 		# rise/set point each time. (Legit...)
-		reactor.callLater(delay+1, self.update_state)
+		reactor.callLater(max(delay+1, 1), self.update_state)
 	
 	
 	def get_next_transition(self):
