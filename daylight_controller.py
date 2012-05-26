@@ -22,13 +22,8 @@ class DaylightController(ShetClient, Controller):
 	def __init__(self, root, lat, long, leeway = 30*60):
 		self.root = root
 		
-		# Goodness knows why this library wants a string
-		self.observer = ephem.Observer()
-		self.observer.lat  = str(lat)
-		self.observer.long = str(long)
-		
-		# This is the body we care about
-		self.sun = ephem.Sun()
+		self.lat  = lat
+		self.long = long
 		
 		# How long before sunset/after sunrise should the lights still turn on
 		self.leeway = leeway
@@ -66,12 +61,21 @@ class DaylightController(ShetClient, Controller):
 		seconds until that time.
 		"""
 		
+		# Goodness knows why this library wants a string
+		observer = ephem.Observer()
+		observer.lat  = str(self.lat)
+		observer.long = str(self.long)
+		
+		# This is the body we care about
+		sun = ephem.Sun()
+		
+		
 		def ephem_to_unix(t):
 			return time.mktime(ephem.localtime(t).timetuple())
 		
-		self.sun.compute()
-		rises = ephem_to_unix(self.observer.next_rising(self.sun)) + self.leeway
-		sets  = ephem_to_unix(self.observer.next_setting(self.sun)) - self.leeway
+		sun.compute()
+		rises = ephem_to_unix(observer.next_rising(sun)) + self.leeway
+		sets  = ephem_to_unix(observer.next_setting(sun)) - self.leeway
 		now   = ephem_to_unix(ephem.now())
 		
 		# If sunset (with leeway) has already happened (unbenonced to ephem) then it
