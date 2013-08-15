@@ -3,6 +3,7 @@ from daylight_controller import DaylightController
 from shet.client import ShetClient, shet_action
 from controller import Controller
 from aggregator import Aggregator
+from shet.sync   import make_sync
 from twisted.internet import reactor, defer
 import random
 from time import localtime, mktime
@@ -12,6 +13,7 @@ DaylightController("/lights/daylight", 53.46171, -2.217164).install()
 colors = ["red", "green", "blue",]
 
 root = "/stairs/routines"
+
 
 def sleep(secs):
 	d = defer.Deferred()
@@ -56,6 +58,7 @@ class Random(LightRoutine):
 	def updateB(self):
 		self.b = self.clamp(self.b + random.randint(-1,1))	
 
+	@make_sync
 	def run(self):
 		LightRoutine.run(self)
 		self.r,self.g,self.b = self.current_rand
@@ -65,7 +68,7 @@ class Random(LightRoutine):
 
 		self.current_rand = self.r,self.g,self.b
 		self.setLights(self.current_rand)
-		sleep(5)
+		yield sleep(5)
 		self.finished()
 
 class Lines(LightRoutine):
@@ -92,13 +95,14 @@ class Lines(LightRoutine):
 								]
 		LightRoutine.__init__(self, "lines")
 
+	@make_sync
 	def display_line(self, line, status):
 		self.setLights((0,0,0))
-		sleep(0.5)
+		yield sleep(0.5)
 		self.setLights(self.lineColour[line])
-		sleep(2.5)
+		yield sleep(2.5)
 		self.setLights(self.statuses[status])
-		sleep(1)
+		yield sleep(1)
 
 	def run(self):
 		LightRoutine.run(self)
@@ -116,12 +120,13 @@ class Bright(LightRoutine):
 	def standby(self):
 		self.time = localtime()
 
+	@make_sync
 	def run(self):
 		LightRoutine.run(self)
 		elapsed = mktime(localtime()) - mktime(self.time) 
 		if elapsed < 8:
 			self.setLights((128,0,0))
-			sleep(10 - elapsed)
+			yield sleep(10 - elapsed)
 			self.finished()
 
 class Frontend(ShetClient):
@@ -136,29 +141,33 @@ class Frontend(ShetClient):
 
 		self.routineQueue = []
 
+		reactor.callWhenRunning(self.popRoutine)
+
 	def on_state_change(self, state):
 		if not state:
 			self.popRoutine()
 
 	def pushRoutine(self, routine):
-		yield self.call(routine+"/standby")
+		self.call(routine+"/standby")
 
 		if routine not in self.routineQueue:
 			self.routineQueue.append(routine)
 
 	def popRoutine(self):
-		print("popping routine")
 		if len(self.routineQueue) > 0:
 			routine = self.routineQueue.pop(0)
-			yield self.call(routine+"/run")
+			self.call(routine+"/run")
 		else:
-			yield self.call(root+"/random/run")
+			self.call(root+"/random/run")
 
+	@make_sync
 	def pirTrig(self):
 		if (localtime().tm_hour in [7,8,9]):
 			self.pushRoutine("lines")
-		if (yield self.get("/lights/daylight/get_state")) != "null":
+		print(yield self.call("/lights/daylight/get_state"))
+		if (yield self.call("/lights/daylight/get_state")) == None:
 			self.pushRoutine("bright")
+			self.popRoutine()
 
 Random().install()
 Lines().install()
