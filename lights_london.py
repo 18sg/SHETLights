@@ -178,7 +178,7 @@ class Bright(LightRoutine):
 		if elapsed < 8:
 			self.setLights((128,0,0))
 			yield sleep(10 - elapsed)
-			self.finished()
+		self.finished()
 
 class Frontend(ShetClient):
 	def __init__(self):
@@ -195,6 +195,10 @@ class Frontend(ShetClient):
 		reactor.callWhenRunning(self.popRoutine)
 
 	def on_state_change(self, state):
+		if state:
+			print("don't pop routine")
+		else:
+			print("pop routine")
 		if not state:
 			self.popRoutine()
 
@@ -207,16 +211,19 @@ class Frontend(ShetClient):
 	def popRoutine(self):
 		if len(self.routineQueue) > 0:
 			routine = self.routineQueue.pop(0)
+			print("pop routine " + routine)
 			self.call(routine+"/run")
 		else:
 			self.call(root+"/random/run")
 
 	@make_sync
 	def pirTrig(self):
-		if (localtime().tm_hour in [7,8,9]):
+		noneQueued = len(self.routineQueue) == 0
+		if (localtime().tm_hour in [20]) and (yield self.call("lines/get_state")) == None:
 			self.pushRoutine("lines")
-		if (yield self.call("/lights/daylight/get_state")) == None:
+		if ((yield self.call("/lights/daylight/get_state")) == None) and (yield self.call("bright/get_state")) == None:
 			self.pushRoutine("bright")
+		if noneQueued:
 			self.popRoutine()
 
 Random().install()
