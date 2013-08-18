@@ -208,19 +208,18 @@ class Frontend(ShetClient):
 	def popRoutine(self):
 		if len(self.routineQueue) > 0:
 			routine = self.routineQueue.pop(0)
-			print("pop routine " + routine)
 			self.call(routine+"/run")
 		else:
 			self.call(root+"/random/run")
 
 	@make_sync
 	def pirTrig(self):
-		noneQueued = len(self.routineQueue) == 0
+		noneQueued = (len(self.routineQueue) == 0)
 		if (localtime().tm_hour in [7,8,9]):
-			self.pushRoutine("lines")
+			yield self.pushRoutine("lines")
 		if ((yield self.call("/lights/daylight/get_state")) == None):
-			self.pushRoutine("bright")
-		if noneQueued:
+			yield self.pushRoutine("bright")
+		if noneQueued and (len(self.routineQueue) > 0):
 			self.popRoutine()
 
 Random().install()
