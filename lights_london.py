@@ -195,18 +195,15 @@ class Frontend(ShetClient):
 		reactor.callWhenRunning(self.popRoutine)
 
 	def on_state_change(self, state):
-		if state:
-			print("don't pop routine")
-		else:
-			print("pop routine")
 		if not state:
 			self.popRoutine()
 
+	@make_sync
 	def pushRoutine(self, routine):
-		self.call(routine+"/standby")
-
-		if routine not in self.routineQueue:
-			self.routineQueue.append(routine)
+		if (yield self.call(routine + "/get_state")) == None:
+			self.call(routine+"/standby")
+			if routine not in self.routineQueue:
+				self.routineQueue.append(routine)
 
 	def popRoutine(self):
 		if len(self.routineQueue) > 0:
@@ -219,9 +216,9 @@ class Frontend(ShetClient):
 	@make_sync
 	def pirTrig(self):
 		noneQueued = len(self.routineQueue) == 0
-		if (localtime().tm_hour in [20]) and (yield self.call("lines/get_state")) == None:
+		if (localtime().tm_hour in [20]):
 			self.pushRoutine("lines")
-		if ((yield self.call("/lights/daylight/get_state")) == None) and (yield self.call("bright/get_state")) == None:
+		if ((yield self.call("/lights/daylight/get_state")) == None):
 			self.pushRoutine("bright")
 		if noneQueued:
 			self.popRoutine()
