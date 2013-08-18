@@ -216,7 +216,7 @@ class Frontend(ShetClient):
 	@make_sync
 	def pirTrig(self):
 		noneQueued = len(self.routineQueue) == 0
-		if (localtime().tm_hour in [20]):
+		if (localtime().tm_hour in [7,8,9]):
 			self.pushRoutine("lines")
 		if ((yield self.call("/lights/daylight/get_state")) == None):
 			self.pushRoutine("bright")
