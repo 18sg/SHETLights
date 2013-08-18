@@ -5,6 +5,7 @@ from controller import Controller
 from aggregator import Aggregator
 from shet.sync   import make_sync
 from twisted.internet import reactor, defer
+from functools import partial
 import random
 from time import localtime, mktime
 
@@ -75,11 +76,22 @@ class Lines(LightRoutine):
 	def __init__(self):
 		self.undergroundRoot = "/underground/"
 
-		self.lineColour = {'District': (0,40,0), 
+		self.lines = {'District': (0,40,0), 
 							'Hammersmith and City': (205,10,11), 
+							'Northern': (0,0,0),
+							'Overground': (170,14,0),
+							'Bakerloo': (37,9,1),
+							'Central': (100,0,0),
 							'Circle': (140,80,0),
+							'DLR': (0,50,18),
+							'Jubilee': (2,2,2),
+							'Metropolitan': (10,0,5),
+							'Piccadilly': (0,0,20),
+							'Victoria': (10,13,100),
+							'Waterloo and City': (0,70,38),
 							}
 		self.statuses = {'MD':(255,25,0), 
+							'PC':(255,25,0),
 							'SD':(255,0,0), 
 							'CS':(255,0,0),
 							'GS':(0,80,0),
@@ -87,30 +99,69 @@ class Lines(LightRoutine):
 		self.watchedLines = ['District', 
 								'Hammersmith and City',
 								'Circle',
+								'Piccadilly',
 								]
-		self.watchedStatuses = ['MD',
+		self.delayStatuses = ['MD',
 								'SD',
 								'CS',
-								'GS',
+								'PC',
 								]
+
 		LightRoutine.__init__(self, "lines")
 
+		self.add_action("all_lines", self.display_all_lines)
+		self.add_action("all_delays", self.display_all_delays)
+		for line in self.lines.keys():
+			self.add_action(line, partial(self.display_line, line))
+
 	@make_sync
-	def display_line(self, line, status):
+	def display_line_status(self, line, status):
 		self.setLights((0,0,0))
 		yield sleep(0.5)
-		self.setLights(self.lineColour[line])
+		self.setLights(self.lines[line])
 		yield sleep(2.5)
 		self.setLights(self.statuses[status])
 		yield sleep(1)
 
+	@make_sync
+	def display_line(self, line):
+		LightRoutine.run(self)
+		status = (yield self.get(self.undergroundRoot + line + "/status_id"))
+		self.setLights((0,0,0))
+		yield sleep(0.5)
+		self.setLights(self.lines[line])
+		yield sleep(2.5)
+		if status in self.statuses.keys():
+			self.setLights(self.statuses[status])
+			yield sleep(1)	
+		self.finished()
+
+	@make_sync
+	def display_all_lines(self):
+		LightRoutine.run(self)
+		for line in self.lines.keys():
+			status = (yield self.get(self.undergroundRoot + line + "/status_id"))
+			if status in self.statuses.keys():
+				yield self.display_line_status(line, status)
+		self.finished()
+
+	@make_sync
+	def display_all_delays(self):
+		LightRoutine.run(self)
+		for line in self.lines.keys():
+			status = (yield self.get(self.undergroundRoot + line + "/status_id"))
+			if status in self.delayStatuses:
+				yield self.display_line_status(line, status)
+		self.finished()
+
+	@make_sync
 	def run(self):
 		LightRoutine.run(self)
-		for line in watchedLines:
-			status = (yield self.client.get(self.undergroundRoot + line + "/status_id"))
-			if status in watchedStatuses:
-				yield self.display_line(line, status)
-				self.finished()
+		for line in self.watchedLines:
+			status = (yield self.get(self.undergroundRoot + line + "/status_id"))
+			if status in self.delayStatuses:
+				yield self.display_line_status(line, status)
+		self.finished()
 		
 class Bright(LightRoutine):
 	def __init__(self):
@@ -164,7 +215,6 @@ class Frontend(ShetClient):
 	def pirTrig(self):
 		if (localtime().tm_hour in [7,8,9]):
 			self.pushRoutine("lines")
-		print(yield self.call("/lights/daylight/get_state"))
 		if (yield self.call("/lights/daylight/get_state")) == None:
 			self.pushRoutine("bright")
 			self.popRoutine()
