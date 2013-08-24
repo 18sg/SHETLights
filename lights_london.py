@@ -45,7 +45,15 @@ class LightRoutine(ShetClient, Controller):
 class Random(LightRoutine):
 	def __init__(self):
 		self.current_rand = (0,0,0)
+		self.delay = 5
 		LightRoutine.__init__(self, "random")
+		self.add_property("delay", self.get_delay, self.set_delay)
+
+	def get_delay(self):
+		return self.delay
+
+	def set_delay(self, delay):
+		self.delay = delay
 
 	def clamp(self, value):
 		return max(0, min(value, 10))
@@ -69,7 +77,7 @@ class Random(LightRoutine):
 
 		self.current_rand = self.r,self.g,self.b
 		self.setLights(self.current_rand)
-		yield sleep(5)
+		yield sleep(self.delay)
 		self.finished()
 
 class Lines(LightRoutine):
