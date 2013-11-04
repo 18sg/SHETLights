@@ -99,7 +99,7 @@ class Lines(LightRoutine):
 							'Waterloo and City': (0,70,38),
 							}
 		self.statuses = {'MD':(255,25,0), 
-							'PC':(255,25,0),
+							'PS':(255,25,0),
 							'SD':(255,0,0), 
 							'CS':(255,0,0),
 							'GS':(0,80,0),
@@ -112,7 +112,7 @@ class Lines(LightRoutine):
 		self.delayStatuses = ['MD',
 								'SD',
 								'CS',
-								'PC',
+								'PS',
 								]
 
 		LightRoutine.__init__(self, "lines")
