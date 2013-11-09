@@ -98,21 +98,29 @@ class Lines(LightRoutine):
 							'Victoria': (10,13,100),
 							'Waterloo and City': (0,70,38),
 							}
-		self.statuses = {'MD':(255,25,0), 
-							'PS':(255,25,0),
-							'SD':(255,0,0), 
-							'CS':(255,0,0),
-							'GS':(0,80,0),
+		self.statuses = {'Good Service':(0,80,0),
+							'Minor Delays':(255,25,0), 
+							'Bus Service':(255,0,0),
+							'Reduced Service':(255,0,0),
+							'Severe Delays':(255,0,0), 
+							'Part Closure':(255,25,0),
+							'Planned Closure':(255,25,0),
+							'Part Suspended':(255,0,0),
+							'Suspended':(255,0,0),
 							}
 		self.watchedLines = ['District', 
 								'Hammersmith and City',
 								'Circle',
 								'Piccadilly',
 								]
-		self.delayStatuses = ['MD',
-								'SD',
-								'CS',
-								'PS',
+		self.delayStatuses = ['Minor Delays',
+								'Bus Service',
+								'Reduced Service',
+								'Severe Delays',
+								'Part Closure',
+								'Planned Closure',
+								'Part Suspended',
+								'Suspended',
 								]
 
 		LightRoutine.__init__(self, "lines")
@@ -134,7 +142,7 @@ class Lines(LightRoutine):
 	@make_sync
 	def display_line(self, line):
 		LightRoutine.run(self)
-		status = (yield self.get(self.undergroundRoot + line + "/status_id"))
+		status = (yield self.get(self.undergroundRoot + line + "/status_des"))
 		self.setLights((0,0,0))
 		yield sleep(0.5)
 		self.setLights(self.lines[line])
@@ -148,7 +156,7 @@ class Lines(LightRoutine):
 	def display_all_lines(self):
 		LightRoutine.run(self)
 		for line in self.lines.keys():
-			status = (yield self.get(self.undergroundRoot + line + "/status_id"))
+			status = (yield self.get(self.undergroundRoot + line + "/status_des"))
 			if status in self.statuses.keys():
 				yield self.display_line_status(line, status)
 		self.finished()
@@ -157,7 +165,7 @@ class Lines(LightRoutine):
 	def display_all_delays(self):
 		LightRoutine.run(self)
 		for line in self.lines.keys():
-			status = (yield self.get(self.undergroundRoot + line + "/status_id"))
+			status = (yield self.get(self.undergroundRoot + line + "/status_des"))
 			if status in self.delayStatuses:
 				yield self.display_line_status(line, status)
 		self.finished()
@@ -166,7 +174,7 @@ class Lines(LightRoutine):
 	def run(self):
 		LightRoutine.run(self)
 		for line in self.watchedLines:
-			status = (yield self.get(self.undergroundRoot + line + "/status_id"))
+			status = (yield self.get(self.undergroundRoot + line + "/status_des"))
 			if status in self.delayStatuses:
 				yield self.display_line_status(line, status)
 		self.finished()
